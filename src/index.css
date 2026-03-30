@@ -2,21 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Lenis smooth scroll ─────────────────────────────────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto; /* Lenis handles this */
   }
-
   body {
     @apply font-sans text-slate-900 antialiased;
-  }
-
-  * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 }
 
+/* ── Gradient backgrounds ────────────────────────────────────────────────── */
 @layer utilities {
   .hero-gradient {
     background-color: #0B1729;
@@ -29,7 +42,7 @@
   .dark-gradient {
     background-color: #0B1729;
     background-image:
-      radial-gradient(ellipse at 80% 50%, rgba(29, 78, 216, 0.1) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 50%, rgba(29, 78, 216, 0.10) 0%, transparent 55%),
       radial-gradient(ellipse at 20% 20%, rgba(29, 78, 216, 0.06) 0%, transparent 40%);
   }
 
@@ -37,14 +50,8 @@
     text-wrap: balance;
   }
 
-  .animate-delay-100 { animation-delay: 100ms; }
-  .animate-delay-200 { animation-delay: 200ms; }
-  .animate-delay-300 { animation-delay: 300ms; }
-  .animate-delay-400 { animation-delay: 400ms; }
-  .animate-delay-500 { animation-delay: 500ms; }
-  .animate-delay-600 { animation-delay: 600ms; }
-
-  .opacity-0-init {
-    opacity: 0;
+  /* gsap-word spans start invisible (GSAP sets initial state via fromTo) */
+  .gsap-word {
+    will-change: transform;
   }
 }

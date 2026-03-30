@@ -1,5 +1,7 @@
+import { useLayoutEffect, useRef } from 'react'
 import { DollarSign, Clock, Globe, BookOpen, Zap, Users } from 'lucide-react'
-import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import { gsap } from '../lib/gsap'
+import { splitWords } from '../lib/splitWords.jsx'
 
 const reasons = [
   {
@@ -41,46 +43,66 @@ const reasons = [
 ]
 
 export default function WhyMacedonia() {
-  const [headingRef, headingVisible] = useScrollAnimation()
-  const [gridRef, gridVisible] = useScrollAnimation()
+  const sectionRef = useRef(null)
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      const st = { trigger: sectionRef.current, start: 'top 78%' }
+
+      gsap.fromTo('.mk-label',
+        { opacity: 0, x: -16 },
+        { opacity: 1, x: 0, duration: 0.6, ease: 'power2.out', scrollTrigger: st }
+      )
+
+      gsap.fromTo('.gsap-word',
+        { yPercent: 110 },
+        { yPercent: 0, duration: 0.9, ease: 'power3.out', stagger: 0.05, scrollTrigger: st }
+      )
+
+      gsap.fromTo('.mk-sub',
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out',
+          scrollTrigger: { ...st, start: 'top 75%' } }
+      )
+
+      // Cards stagger with slight clip reveal feel (y + scale)
+      gsap.fromTo('.mk-card',
+        { opacity: 0, y: 50, scale: 0.96 },
+        {
+          opacity: 1, y: 0, scale: 1,
+          duration: 0.8, ease: 'power3.out', stagger: { amount: 0.55, from: 'start' },
+          scrollTrigger: { trigger: '.mk-grid', start: 'top 82%' },
+        }
+      )
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <section className="bg-cream py-20 lg:py-28">
+    <section ref={sectionRef} className="bg-cream py-20 lg:py-28">
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
 
-        {/* Heading */}
-        <div
-          ref={headingRef}
-          className={`max-w-2xl mb-14 transition-all duration-700 ${
-            headingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
-        >
-          <p className="text-blue-700 text-sm font-semibold tracking-widest uppercase mb-3">
+        <div className="max-w-2xl mb-14">
+          <p className="mk-label text-blue-700 text-sm font-semibold tracking-widest uppercase mb-3 opacity-0">
             The location
           </p>
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 leading-tight mb-4">
-            Why North Macedonia?
+            {splitWords('Why North Macedonia?')}
           </h2>
-          <p className="text-slate-500 text-lg leading-relaxed">
+          <p className="mk-sub text-slate-500 text-lg leading-relaxed opacity-0">
             One of Europe's best-kept nearshoring destinations — skilled, affordable,
             culturally aligned, and operating in your time zone.
           </p>
         </div>
 
-        {/* Reasons grid */}
-        <div
-          ref={gridRef}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {reasons.map((reason, index) => {
+        <div className="mk-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {reasons.map((reason) => {
             const Icon = reason.icon
             return (
               <div
                 key={reason.title}
-                style={{ transitionDelay: `${index * 80}ms` }}
-                className={`bg-white rounded-xl p-6 border border-cream-dark hover:shadow-md transition-all duration-500 ${
-                  gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
+                className="mk-card bg-white rounded-xl p-6 border border-cream-dark hover:shadow-md transition-shadow duration-300 opacity-0"
               >
                 <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center mb-4">
                   <Icon size={17} className="text-blue-700" />

@@ -1,5 +1,7 @@
+import { useLayoutEffect, useRef } from 'react'
 import { TrendingUp, Users, AlertTriangle, Layers } from 'lucide-react'
-import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import { gsap } from '../lib/gsap'
+import { splitWords } from '../lib/splitWords.jsx'
 
 const painPoints = [
   {
@@ -29,47 +31,77 @@ const painPoints = [
 ]
 
 export default function Problem() {
-  const [headingRef, headingVisible] = useScrollAnimation()
-  const [cardsRef, cardsVisible] = useScrollAnimation()
-  const [transitionRef, transitionVisible] = useScrollAnimation()
+  const sectionRef = useRef(null)
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      const st = { trigger: sectionRef.current, start: 'top 78%' }
+
+      // Section label
+      gsap.fromTo('.problem-label',
+        { opacity: 0, x: -16 },
+        { opacity: 1, x: 0, duration: 0.6, ease: 'power2.out', scrollTrigger: st }
+      )
+
+      // Heading words
+      gsap.fromTo('.gsap-word',
+        { yPercent: 110 },
+        { yPercent: 0, duration: 0.9, ease: 'power3.out', stagger: 0.05, scrollTrigger: st }
+      )
+
+      // Sub text
+      gsap.fromTo('.problem-sub',
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', scrollTrigger: { ...st, start: 'top 75%' } }
+      )
+
+      // Pain point cards — stagger reveal
+      gsap.fromTo('.pain-card',
+        { opacity: 0, y: 44, scale: 0.97 },
+        {
+          opacity: 1, y: 0, scale: 1,
+          duration: 0.75, ease: 'power3.out', stagger: 0.12,
+          scrollTrigger: { trigger: '.pain-grid', start: 'top 80%' },
+        }
+      )
+
+      // Transition block
+      gsap.fromTo('.problem-transition',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
+          scrollTrigger: { trigger: '.problem-transition', start: 'top 85%' } }
+      )
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <section className="bg-white py-20 lg:py-28">
+    <section ref={sectionRef} className="bg-white py-20 lg:py-28">
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
 
-        {/* Section label + heading */}
-        <div
-          ref={headingRef}
-          className={`max-w-2xl mb-14 transition-all duration-700 ${
-            headingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
-        >
-          <p className="text-blue-700 text-sm font-semibold tracking-widest uppercase mb-3">
+        {/* Heading */}
+        <div className="max-w-2xl mb-14">
+          <p className="problem-label text-blue-700 text-sm font-semibold tracking-widest uppercase mb-3 opacity-0">
             The challenge
           </p>
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 leading-tight mb-4">
-            The real cost of getting operations wrong
+            {splitWords('The real cost of getting operations wrong')}
           </h2>
-          <p className="text-slate-500 text-lg leading-relaxed">
+          <p className="problem-sub text-slate-500 text-lg leading-relaxed opacity-0">
             Labour costs in Nordic and Benelux markets are rising. Local talent is scarce.
             And traditional offshore outsourcing often creates more problems than it solves.
           </p>
         </div>
 
         {/* Pain point cards */}
-        <div
-          ref={cardsRef}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-16"
-        >
-          {painPoints.map((point, index) => {
+        <div className="pain-grid grid grid-cols-1 sm:grid-cols-2 gap-5 mb-16">
+          {painPoints.map((point) => {
             const Icon = point.icon
             return (
               <div
                 key={point.title}
-                style={{ transitionDelay: `${index * 100}ms` }}
-                className={`flex gap-4 p-6 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-300 ${
-                  cardsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                }`}
+                className="pain-card flex gap-4 p-6 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-300 opacity-0"
               >
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
                   <Icon size={18} className="text-slate-500" />
@@ -83,13 +115,8 @@ export default function Problem() {
           })}
         </div>
 
-        {/* Transition to solution */}
-        <div
-          ref={transitionRef}
-          className={`border-t border-slate-100 pt-10 transition-all duration-700 ${
-            transitionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
-        >
+        {/* Transition */}
+        <div className="problem-transition border-t border-slate-100 pt-10 opacity-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
             <div className="flex-1">
               <p className="text-xl font-semibold text-slate-900 mb-1">
